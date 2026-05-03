@@ -16,7 +16,7 @@ import SentenceBuilderGame from './components/SentenceBuilderGame';
 
 type GameMode = 'lesson' | 'match' | 'spell' | 'arrowMatch' | 'listen' | 'dragFaces' | 'statement' | 'question' | 'andBut' | 'sentenceBuilder' | 'speak';
 
-const CURRICULUM: Array<GameMode> = Array.from({ length: 100 }, (_, i) => {
+const MIXED_CURRICULUM: Array<GameMode> = Array.from({ length: 200 }, (_, i) => {
   if (i === 0) return 'lesson';
   if (i < 4) return 'match';
   if (i < 7) return i % 2 === 0 ? 'arrowMatch' : 'spell';
@@ -26,9 +26,12 @@ const CURRICULUM: Array<GameMode> = Array.from({ length: 100 }, (_, i) => {
   if (i < 17) return i % 2 === 0 ? 'statement' : 'sentenceBuilder';
   if (i < 20) return i % 2 === 0 ? 'question' : 'speak';
   
-  const cycle: GameMode[] = ['lesson', 'arrowMatch', 'dragFaces', 'sentenceBuilder', 'andBut', 'statement', 'listen', 'spell', 'match', 'question', 'speak'];
+  const cycle: GameMode[] = ['arrowMatch', 'dragFaces', 'sentenceBuilder', 'andBut', 'statement', 'listen', 'spell', 'match', 'question', 'speak'];
+  if (i % 12 === 0) return 'lesson';
   return cycle[i % cycle.length];
 });
+
+const LESSONS_CURRICULUM: Array<GameMode> = Array.from({ length: 100 }, () => 'lesson');
 
 export default function App() {
   const [score, setScore] = useState(0);
@@ -37,8 +40,20 @@ export default function App() {
   const [levelIndex, setLevelIndex] = useState(0);
   const [gameState, setGameState] = useState<'start' | 'playing' | 'transition'>('start');
   const [key, setKey] = useState(0);
+  const [playMode, setPlayMode] = useState<'mixed' | 'lessonsOnly'>('mixed');
 
-  const gameMode = CURRICULUM[levelIndex % CURRICULUM.length];
+  const currentCurriculum = playMode === 'mixed' ? MIXED_CURRICULUM : LESSONS_CURRICULUM;
+  const gameMode = currentCurriculum[levelIndex % currentCurriculum.length];
+
+  const startGame = (mode: 'mixed' | 'lessonsOnly') => {
+    sounds.playPop();
+    setScore(0);
+    setCombo(1);
+    setLevelIndex(0);
+    setPlayMode(mode);
+    setGameState('playing');
+    setKey(k => k + 1);
+  };
 
   useEffect(() => {
     if (gameState === 'transition') {
@@ -92,15 +107,6 @@ export default function App() {
     setKey(k => k + 1);
   };
 
-  const startGame = () => {
-    sounds.playPop();
-    setScore(0);
-    setCombo(1);
-    setLevelIndex(0);
-    setGameState('playing');
-    setKey(k => k + 1);
-  };
-
   if (gameState === 'start') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#FFF0F3] to-[#FFE3E9] text-[#4A1D34] flex flex-col items-center justify-center p-8 font-sans overflow-hidden">
@@ -123,12 +129,20 @@ export default function App() {
           </div>
           <h1 className="text-5xl font-black text-[#A06CD5] tracking-tight uppercase drop-shadow-sm">Yummy <br/>English!</h1>
           <p className="text-xl text-[#FF85A1] font-bold uppercase tracking-widest bg-pink-50 inline-block px-4 py-2 rounded-full border-2 border-pink-100">Let's play!</p>
-          <button 
-            onClick={startGame}
-            className="w-full py-5 px-8 bg-gradient-to-br from-[#FF85A1] to-[#FF4D6D] text-white rounded-full text-2xl font-black shadow-lg hover:shadow-xl shadow-pink-300 transform transition active:scale-95 hover:scale-[1.03] flex items-center justify-center gap-3 uppercase tracking-wide border-b-[6px] border-pink-700 mt-4"
-          >
-            <Sparkles className="w-8 h-8 fill-yellow-300 text-yellow-300" /> Play Now!
-          </button>
+          <div className="flex flex-col gap-4 mt-4 w-full px-4">
+            <button 
+              onClick={() => startGame('mixed')}
+              className="w-full py-5 px-8 bg-gradient-to-br from-[#FF85A1] to-[#FF4D6D] text-white rounded-full text-2xl font-black shadow-lg hover:shadow-xl shadow-pink-300 transform transition active:scale-95 hover:scale-[1.03] flex items-center justify-center gap-3 uppercase tracking-wide border-b-[6px] border-pink-700"
+            >
+              <Sparkles className="w-8 h-8 fill-yellow-300 text-yellow-300" /> ¡JUEGO COMPLETO!
+            </button>
+            <button 
+              onClick={() => startGame('lessonsOnly')}
+              className="w-full py-4 px-8 bg-gradient-to-br from-[#A06CD5] to-[#8B5BB8] text-white rounded-full text-xl font-bold shadow-lg hover:shadow-xl shadow-purple-300 transform transition active:scale-95 hover:scale-[1.03] flex items-center justify-center gap-3 uppercase tracking-wide border-b-[6px] border-purple-800"
+            >
+              📚 SOLO LECCIONES
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -160,12 +174,12 @@ export default function App() {
 
         <div className="flex flex-col items-center">
           <div className="text-[10px] sm:text-xs font-black text-[#A06CD5] uppercase tracking-widest bg-purple-100 px-4 py-1 rounded-full border-2 border-purple-200">
-            Mission {levelIndex + 1} / {CURRICULUM.length}
+            Mission {levelIndex + 1} / {currentCurriculum.length}
           </div>
           <div className="w-32 sm:w-48 h-4 bg-gray-200 rounded-full mt-2 overflow-hidden border-2 border-white shadow-inner">
             <div 
               className="bg-gradient-to-r from-[#A06CD5] to-[#FF85A1] h-full rounded-full transition-all duration-500" 
-              style={{ width: `${Math.max(5, ((levelIndex + 1) / CURRICULUM.length) * 100)}%` }}
+              style={{ width: `${Math.max(5, ((levelIndex + 1) / currentCurriculum.length) * 100)}%` }}
             ></div>
           </div>
         </div>
