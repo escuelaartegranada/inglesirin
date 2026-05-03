@@ -74,6 +74,26 @@ class SoundSynthesizer {
     osc.stop(t + 0.1);
   }
 
+  playTone(frequency: number, type: OscillatorType, duration: number) {
+    this.init();
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    
+    osc.type = type;
+    osc.frequency.setValueAtTime(frequency, t);
+
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.3, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.01, t + duration);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(t);
+    osc.stop(t + duration);
+  }
+
   speak(text: string, lang = 'en-GB') {
     if ('speechSynthesis' in window) {
       // Cancel any ongoing speech

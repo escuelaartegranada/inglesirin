@@ -8,14 +8,25 @@ import QuestionGame from './components/QuestionGame';
 import StatementGame from './components/StatementGame';
 import SpeakGame from './components/SpeakGame';
 import ListenSequenceGame from './components/ListenSequenceGame';
+import LessonScreen from './components/LessonScreen';
+import DragFacesGame from './components/DragFacesGame';
+import AndButGame from './components/AndButGame';
+import ArrowMatchGame from './components/ArrowMatchGame';
+import SentenceBuilderGame from './components/SentenceBuilderGame';
 
-const CURRICULUM: Array<'match' | 'spell' | 'question' | 'statement' | 'speak' | 'listen'> = Array.from({ length: 100 }, (_, i) => {
-  if (i < 3) return 'match';
-  if (i < 6) return i % 2 === 0 ? 'spell' : 'statement';
-  if (i < 9) return i % 2 === 0 ? 'question' : 'listen';
-  if (i < 12) return 'speak';
+type GameMode = 'lesson' | 'match' | 'spell' | 'arrowMatch' | 'listen' | 'dragFaces' | 'statement' | 'question' | 'andBut' | 'sentenceBuilder' | 'speak';
+
+const CURRICULUM: Array<GameMode> = Array.from({ length: 100 }, (_, i) => {
+  if (i === 0) return 'lesson';
+  if (i < 4) return 'match';
+  if (i < 7) return i % 2 === 0 ? 'arrowMatch' : 'spell';
+  if (i === 7) return 'lesson';
+  if (i < 12) return i % 2 === 0 ? 'dragFaces' : 'listen';
+  if (i < 14) return 'andBut';
+  if (i < 17) return i % 2 === 0 ? 'statement' : 'sentenceBuilder';
+  if (i < 20) return i % 2 === 0 ? 'question' : 'speak';
   
-  const cycle = ['match', 'statement', 'listen', 'spell', 'question', 'speak', 'spell', 'match', 'listen', 'question', 'speak', 'statement'] as const;
+  const cycle: GameMode[] = ['lesson', 'arrowMatch', 'dragFaces', 'sentenceBuilder', 'andBut', 'statement', 'listen', 'spell', 'match', 'question', 'speak'];
   return cycle[i % cycle.length];
 });
 
@@ -179,7 +190,12 @@ export default function App() {
       {/* Main Game Area */}
       <main className="flex-1 w-full max-w-5xl mx-auto p-4 flex flex-col items-center justify-center z-10 relative">
         <div className={`w-full transition-opacity duration-300 ${gameState === 'transition' ? 'opacity-50 pointer-events-none blur-sm' : 'opacity-100'}`}>
+          {gameMode === 'lesson' && <LessonScreen key={key} onComplete={handleComplete} />}
           {gameMode === 'match' && <MatchGame key={key} onComplete={handleComplete} />}
+          {gameMode === 'arrowMatch' && <ArrowMatchGame key={key} onComplete={handleComplete} />}
+          {gameMode === 'dragFaces' && <DragFacesGame key={key} onComplete={handleComplete} />}
+          {gameMode === 'andBut' && <AndButGame key={key} onComplete={handleComplete} />}
+          {gameMode === 'sentenceBuilder' && <SentenceBuilderGame key={key} onComplete={handleComplete} />}
           {gameMode === 'spell' && <SpellGame key={key} onComplete={handleComplete} />}
           {gameMode === 'question' && <QuestionGame key={key} onComplete={handleComplete} />}
           {gameMode === 'statement' && <StatementGame key={key} onComplete={handleComplete} />}

@@ -31,7 +31,7 @@ const DraggableWord = ({ id, word, isDragging }: { id: string, word: string, isD
   );
 }
 
-const DroppableImage = ({ id, emoji, color }: { id: string, emoji: string, color: string, key?: string | number }) => {
+const DroppableImage = ({ id, emoji, color, key }: { id: string, emoji: string, color: string, key?: string | number }) => {
   const { isOver, setNodeRef } = useDroppable({
     id: id,
   });
