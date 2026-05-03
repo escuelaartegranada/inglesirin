@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { DndContext, useDraggable, useDroppable, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, useDraggable, useDroppable, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { sounds } from '../lib/sounds';
 import { getRandomFoods } from '../data/foods';
 
@@ -25,7 +25,7 @@ const DraggableFace = ({ id, emoji }: { id: string, emoji: string }) => {
       style={style}
       {...listeners}
       {...attributes}
-      className={`w-24 h-24 rounded-full bg-white border-4 border-gray-200 shadow-xl flex items-center justify-center text-6xl cursor-grab active:cursor-grabbing transition-shadow ${
+      className={`w-24 h-24 rounded-full bg-white border-4 border-gray-200 shadow-xl flex items-center justify-center text-6xl cursor-grab active:cursor-grabbing transition-shadow touch-none ${
         isDragging ? 'opacity-80 shadow-2xl scale-110' : ''
       }`}
     >
@@ -61,6 +61,16 @@ export default function DragFacesGame({ onComplete }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likesIt, setLikesIt] = useState(true);
   const [droppedFace, setDroppedFace] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(MouseSensor),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 50,
+        tolerance: 5,
+      },
+    })
+  );
 
   useEffect(() => {
     setFoods(getRandomFoods(3));
@@ -127,7 +137,7 @@ export default function DragFacesGame({ onComplete }: Props) {
         >
           🔊
         </button>
-        <DndContext onDragEnd={handleDragEnd}>
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
           <div className="flex gap-20 items-center mt-6">
             <div className="flex flex-col gap-8">
               <DraggableFace id="like" emoji="😋" />

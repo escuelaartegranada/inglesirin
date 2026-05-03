@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DndContext, useDraggable, useDroppable, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, useDraggable, useDroppable, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { getRandomFoods } from '../data/foods';
 import { motion, AnimatePresence } from 'motion/react';
 import { sounds } from '../lib/sounds';
@@ -51,6 +51,16 @@ export default function MatchGame({ onComplete }: Props) {
   const [options, setOptions] = useState<any[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
 
+  const sensors = useSensors(
+    useSensor(MouseSensor),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 50,
+        tolerance: 5,
+      },
+    })
+  );
+
   useEffect(() => {
     // Select 3 random foods
     const foods = getRandomFoods(3);
@@ -99,7 +109,7 @@ export default function MatchGame({ onComplete }: Props) {
         </div>
       </div>
 
-      <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="w-full bg-white/80 rounded-[40px] p-10 border-[6px] border-dashed border-[#A06CD5] flex flex-col items-center gap-14 shadow-2xl max-w-2xl backdrop-blur-sm">
           
           {/* The Word to Drag */}

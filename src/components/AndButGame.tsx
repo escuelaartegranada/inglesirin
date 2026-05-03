@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { DndContext, useDraggable, useDroppable, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, useDraggable, useDroppable, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { sounds } from '../lib/sounds';
 import { getRandomFoods } from '../data/foods';
 
@@ -28,7 +28,7 @@ const DraggableItem = ({ food, isDragging, key }: { food: any, isDragging?: bool
       style={style}
       {...listeners}
       {...attributes}
-      className={`w-24 h-24 md:w-32 md:h-32 bg-white rounded-[2rem] border-4 border-[#FFB8D1] flex items-center justify-center text-5xl md:text-7xl shadow-lg cursor-grab active:cursor-grabbing hover:scale-105 transition-transform ${
+      className={`w-24 h-24 md:w-32 md:h-32 bg-white rounded-[2rem] border-4 border-[#FFB8D1] flex items-center justify-center text-5xl md:text-7xl shadow-lg cursor-grab active:cursor-grabbing hover:scale-105 transition-transform touch-none ${
         isSelfDragging ? 'opacity-80 scale-110 shadow-2xl z-50' : ''
       }`}
     >
@@ -73,6 +73,16 @@ export default function AndButGame({ onComplete }: Props) {
   const [sentencePhrase, setSentencePhrase] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(MouseSensor),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 50,
+        tolerance: 5,
+      },
+    })
+  );
 
   useEffect(() => {
     // Pick 4 random foods
@@ -187,7 +197,7 @@ export default function AndButGame({ onComplete }: Props) {
         )}
       </div>
 
-      <DndContext onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
         {/* Buckets */}
         <div className="flex flex-col md:flex-row gap-6 w-full px-4">
           <div className="flex-1 bg-[#8FDAA8] rounded-[40px] p-4 md:p-6 shadow-xl border-b-8 border-[#6BC589]">
